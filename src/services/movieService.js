@@ -607,28 +607,42 @@ export const getTrending = async (mediaType = 'all', timeWindow = 'day', page = 
 // Get movie images (posters, backdrops)
 export const getMovieImages = async (movieId) => {
   try {
-    const response = await tmdbApi.get(`/movie/${movieId}/images`);
+    // Include language parameter to get images with English text when available
+    const response = await tmdbApi.get(`/movie/${movieId}/images`, {
+      params: {
+        include_image_language: 'en,null'
+      }
+    });
     
-    const posters = response.data.posters.map(poster => ({
-      filePath: `${IMAGE_BASE_URL}${POSTER_SIZE}${poster.file_path}`,
-      aspectRatio: poster.aspect_ratio,
-      height: poster.height,
-      width: poster.width,
-      language: poster.iso_639_1
-    }));
+    // Filter and process posters
+    let posters = [];
+    if (response.data.posters && response.data.posters.length > 0) {
+      posters = response.data.posters.map(poster => ({
+        filePath: `${IMAGE_BASE_URL}${POSTER_SIZE}${poster.file_path}`,
+        aspectRatio: poster.aspect_ratio,
+        height: poster.height,
+        width: poster.width,
+        language: poster.iso_639_1
+      }));
+    }
     
-    const backdrops = response.data.backdrops.map(backdrop => ({
-      filePath: `${IMAGE_BASE_URL}${BACKDROP_SIZE}${backdrop.file_path}`,
-      aspectRatio: backdrop.aspect_ratio,
-      height: backdrop.height,
-      width: backdrop.width,
-      language: backdrop.iso_639_1
-    }));
+    // Filter and process backdrops
+    let backdrops = [];
+    if (response.data.backdrops && response.data.backdrops.length > 0) {
+      backdrops = response.data.backdrops.map(backdrop => ({
+        filePath: `${IMAGE_BASE_URL}${BACKDROP_SIZE}${backdrop.file_path}`,
+        aspectRatio: backdrop.aspect_ratio,
+        height: backdrop.height,
+        width: backdrop.width,
+        language: backdrop.iso_639_1
+      }));
+    }
     
     return { posters, backdrops };
   } catch (error) {
     console.error(`Error fetching movie images for ID ${movieId}:`, error);
-    throw error;
+    // Return empty arrays instead of throwing error to prevent app from crashing
+    return { posters: [], backdrops: [] };
   }
 };
 

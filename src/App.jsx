@@ -96,8 +96,8 @@ function App() {
 
   return (
     <div className="bg-primary text-white min-h-screen">
-      {/* Header */}
-      <Header />
+      {/* Header with search functionality */}
+      <Header onSearch={setSearchQuery} />
       
       {/* Loading State */}
       {isLoading ? (
